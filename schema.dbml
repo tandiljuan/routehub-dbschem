@@ -1,0 +1,325 @@
+// ------------------------------------
+
+Project RouteHub {
+  Note: "DBML representation of the RouteHub ERD"
+}
+
+// ------------------------------------
+// Global Enumerations
+
+Enum length_unit {
+  CENTIMETER
+  METER
+  KILOMETER
+  INCH
+  FEET
+  MILE
+}
+
+Enum volume_unit {
+  CUBIC_CENTIMETER
+  CUBIC_METER
+  LITER
+  CUBIC_INCH
+  CUBIC_FEET
+  GALLON
+}
+
+Enum weight_unit {
+  GRAMS
+  KILOGRAMS
+  OUNCES
+  POUNDS
+}
+
+Enum time_unit {
+  SECOND
+  MINUTE
+  HOUR
+}
+
+// ------------------------------------
+// Stakeholders
+
+Table tenant {
+  id integer [pk, increment]
+  alias varchar(50) [unique, not null]
+}
+
+Table company {
+  id integer [pk, increment]
+  tenant_id integer [not null]
+  alias varchar(50) [not null]
+  indexes {
+    (tenant_id, alias) [unique]
+  }
+}
+
+Ref fk__company__tenant: company.tenant_id > tenant.id [delete: cascade]
+
+Table user {
+  id integer [pk, increment]
+  company_id integer [not null]
+  alias varchar(50) [not null]
+  indexes {
+    (company_id, alias) [unique]
+  }
+}
+
+Ref fk__user__company: user.company_id > company.id [delete: cascade]
+
+// ------------------------------------
+// Vehicle
+
+Enum vehicle_consumption_unit {
+  LITERS_PER_100KM
+  KILOMETERS_PER_LITER
+  MILES_PER_GALLON
+  GALLONS_PER_MILE
+}
+
+Enum vehicle_category_type {
+  TRUCK
+  VAN
+  PICKUP
+  MOTORCYCLE
+  BICYCLE
+}
+
+Enum vehicle_engine_type {
+  GASOLINE
+  DIESEL
+  CNG [note: 'Compressed Natural Gas']
+  ELECTRIC
+  HYBRID
+  MECHANIC [note: 'Human Powered']
+}
+
+Table vehicle {
+  id integer [pk, increment]
+  company_id integer [not null]
+  name varchar(255) [not null]
+  volume integer
+  volume_unit volume_unit [null]
+  consumption integer
+  consumption_unit vehicle_consumption_unit [null]
+  category_type vehicle_category_type [null]
+  engine_type vehicle_engine_type [null]
+}
+
+Ref fk__vehicle__company: vehicle.company_id > company.id [delete: cascade]
+
+// ------------------------------------
+// Fleet
+
+Table fleet {
+  id integer [pk, increment]
+  company_id integer [not null]
+  name varchar(255) [not null]
+}
+
+Ref fk__fleet__company: fleet.company_id > company.id [delete: cascade]
+
+Table fleet_vehicle {
+  fleet_id integer
+  vehicle_id integer
+  quantity integer [not null]
+  indexes {
+    (fleet_id, vehicle_id) [pk, unique]
+  }
+}
+
+Ref fk__fleet_vehicle__fleet: fleet_vehicle.fleet_id > fleet.id [delete: cascade]
+Ref fk__fleet_vehicle__vehicle: fleet_vehicle.vehicle_id > vehicle.id [delete: cascade]
+
+// ------------------------------------
+// Driver
+
+Table driver {
+  id integer [pk, increment]
+  company_id integer [not null]
+  first_name varchar(50) [not null]
+  last_name varchar(50)
+  work_schedules JSON [note: "List of RFC 5545"]
+  start_point varchar(25) [note: "ISO 6709:DD (e.g. '+DD.DDDDDDD+DDD.DDDDDDD/')"]
+  end_point varchar(25) [note: "ISO 6709:DD (e.g. '+DD.DDDDDDD+DDD.DDDDDDD/')"]
+  work_areas JSON [null, note: "List of lists of geographic working areas (ISO 6709:DD)"]
+}
+
+Ref fk__driver__company: driver.company_id > company.id [delete: cascade]
+
+Table driver_vehicle {
+  driver_id integer
+  vehicle_id integer
+  quantity integer [not null]
+  indexes {
+    (driver_id, vehicle_id) [pk, unique]
+  }
+}
+
+Ref fk__driver_vehicle__driver: driver_vehicle.driver_id > driver.id [delete: cascade]
+Ref fk__driver_vehicle__vehicle: driver_vehicle.vehicle_id > vehicle.id [delete: cascade]
+
+// ------------------------------------
+// Milestone
+
+Enum milestone_category {
+  DEPOT
+  DISTRIBUTION_CENTER
+  LOADING_POINT
+  WAREHOUSE
+  TRANSFER_POINT
+}
+
+Table milestone {
+  id integer [pk, increment]
+  company_id integer [not null]
+  name varchar(255) [not null]
+  location varchar(25) [not null, note: "ISO 6709:DD (e.g. '+DD.DDDDDDD+DDD.DDDDDDD/')"]
+  category milestone_category [null]
+}
+
+Ref fk__milestone__company: milestone.company_id > company.id [delete: cascade]
+
+// ------------------------------------
+// Delivery
+
+Enum delivery_method {
+  DELIVERY
+  PICKUP
+  SIGNATURE
+}
+
+Enum packaging_type {
+  BOX [note: 'Rigid packaging made of cardboard or wood']
+  ENVELOPE
+  BAG
+  CARTON [note: 'Lightweight containers made from paperboard']
+  PALLET
+  SHRINK_WRAP [note: 'Often used for pallets']
+}
+
+Enum  special_handling {
+  FRAGILE
+  PERISHABLE [note: 'Goods that require to remain fresh, such as food or pharmaceuticals']
+  HAZARDOUS
+  REFRIGERATED [note: 'Items that need to be kept at low temperatures at all times']
+}
+
+Table delivery {
+  id integer [pk, increment]
+  company_id integer [not null]
+  method delivery_method [null]
+  milestone_id integer
+  destination varchar(25) [note: "ISO 6709:DD (e.g. '+DD.DDDDDDD+DDD.DDDDDDD/')"]
+  schedules JSON [note: "List of RFC 5545"]
+  width integer
+  height integer
+  depth integer
+  length_unit length_unit [null]
+  volume integer
+  volume_unit volume_unit [null]
+  weight integer
+  weight_unit weight_unit [null]
+  packaging packaging_type [null]
+  handling special_handling [null, note: "List of special handling"]
+  value_cents integer
+  value_currency varchar(3) [note: 'ISO 4217 code']
+  extra JSON
+}
+
+Ref fk__delivery__company: delivery.company_id > company.id [delete: cascade]
+Ref fk__delivery__milestone: delivery.milestone_id > milestone.id [delete: set null]
+
+// ------------------------------------
+// Delivery Lot
+
+Enum delivery_lot_state {
+  UNPROCESSED
+  PROCESSING
+  PROCESSED
+  CANCELED
+}
+
+Table delivery_lot {
+  id integer [pk, increment]
+  company_id integer [not null]
+  milestone_id integer
+  fleet_id integer
+  state delivery_lot_state [not null, default: 'UNPROCESSED']
+  vehicle_volume_min integer [note: 'Minimum loading volume percentage']
+  vehicle_volume_max integer [note: 'Maximum loading volume percentage']
+  vehicle_capacity_min integer [note: 'Minimum packages capacity']
+  vehicle_capacity_max integer [note: 'Maximum packages capacity']
+  route_stops_min integer [note: 'Minimum required stops']
+  route_stops_max integer [note: 'Maximum required stops']
+  route_length_min integer [note: 'Minimum distance for a delivery route']
+  route_length_max integer [note: 'Maximum distance for a delivery route']
+  route_length_unit length_unit [null]
+  route_time_max integer [note: 'Maximum delivery route time']
+  route_time_unit time_unit [null]
+}
+
+Ref fk__delivery_lot__company: delivery_lot.company_id > company.id [delete: cascade]
+Ref fk__delivery_lot__milestone: delivery_lot.milestone_id > milestone.id [delete: set null]
+Ref fk__delivery_lot__fleet: delivery_lot.fleet_id > fleet.id [delete: set null]
+
+Table delivery_lot_delivery {
+  delivery_lot_id integer
+  delivery_id integer
+  indexes {
+    (delivery_lot_id, delivery_id) [pk, unique]
+  }
+}
+
+Ref fk__delivery_lot_delivery__delivery_lot: delivery_lot_delivery.delivery_lot_id > delivery_lot.id [delete: cascade]
+Ref fk__delivery_lot_delivery__delivery: delivery_lot_delivery.delivery_id > delivery.id [delete: cascade]
+
+Table delivery_lot_driver {
+  delivery_lot_id integer
+  driver_id integer
+  indexes {
+    (delivery_lot_id, driver_id) [pk, unique]
+  }
+}
+
+Ref fk__delivery_lot_driver__delivery_lot: delivery_lot_driver.delivery_lot_id > delivery_lot.id [delete: cascade]
+Ref fk__delivery_lot_driver__driver: delivery_lot_driver.driver_id > driver.id [delete: cascade]
+
+// ------------------------------------
+// Delivery Plan
+
+Table delivery_plan {
+  id integer [pk, increment]
+  delivery_lot_id integer [not null]
+}
+
+Ref fk__delivery_plan__delivery_lot: delivery_plan.delivery_lot_id > delivery_lot.id [delete: cascade]
+
+Table delivery_path {
+  id integer [pk, increment]
+  delivery_plan_id integer [not null]
+  milestone_id integer [not null]
+  vehicle_id integer
+  driver_id integer
+}
+
+Ref fk__delivery_path__delivery_plan: delivery_path.delivery_plan_id > delivery_plan.id [delete: cascade]
+Ref fk__delivery_path__milestone: delivery_path.milestone_id > milestone.id [delete: cascade]
+Ref fk__delivery_path__vehicle: delivery_path.vehicle_id > vehicle.id [delete: set null]
+Ref fk__delivery_path__driver: delivery_path.driver_id > driver.id [delete: set null]
+
+Table delivery_path_delivery {
+  delivery_path_id integer
+  delivery_id integer
+  delivery_order integer [not null]
+  indexes {
+    (delivery_path_id, delivery_id) [pk, unique]
+    (delivery_path_id, delivery_order) [unique]
+  }
+}
+
+Ref fk__delivery_path_delivery__delivery_path: delivery_path_delivery.delivery_path_id > delivery_path.id [delete: cascade]
+Ref fk__delivery_path_delivery__delivery: delivery_path_delivery.delivery_id > delivery.id [delete: cascade]
+
+// ------------------------------------
