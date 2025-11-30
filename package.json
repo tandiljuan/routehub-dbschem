@@ -7,6 +7,9 @@
   "devDependencies": {
     "@dbml/cli": "^5.2.0"
   },
+  "scripts": {
+    "2pg": "dbml2sql --postgres --out-file schema.postgresql.sql schema.dbml"
+  },
   "engines": {
     "node": ">= 20.19"
   }
