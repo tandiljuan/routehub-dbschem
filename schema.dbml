@@ -225,6 +225,7 @@ Table delivery {
   handling special_handling [null, note: "List of special handling"]
   value_cents integer
   value_currency varchar(3) [note: 'ISO 4217 code']
+  // 'extra' must be an 1:1 relation to the 'extra' table
   extra JSON
 }
 
@@ -256,8 +257,15 @@ Table delivery_lot {
   route_length_min integer [note: 'Minimum distance for a delivery route']
   route_length_max integer [note: 'Maximum distance for a delivery route']
   route_length_unit length_unit [null]
+  route_time_min integer [note: 'Minimum delivery route time']
   route_time_max integer [note: 'Maximum delivery route time']
   route_time_unit time_unit [null]
+  // created_at date
+  // created_by integer
+  // updated_at date
+  // updated_by integer
+  // deleted_at date
+  // deleted_by integer
 }
 
 Ref fk__delivery_lot__company: delivery_lot.company_id > company.id [delete: cascade]
