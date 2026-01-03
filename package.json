@@ -1,0 +1,16 @@
+{
+  "name": "routehub-dbschem",
+  "version": "0.1.0",
+  "description": "RouteHub Database Schema",
+  "author": "Juan Manuel Lopez",
+  "license": "GNU AFFERO GENERAL PUBLIC LICENSE",
+  "devDependencies": {
+    "@dbml/cli": "^5.2.0"
+  },
+  "scripts": {
+    "2pg": "dbml2sql --postgres --out-file schema.postgresql.sql schema.dbml"
+  },
+  "engines": {
+    "node": ">= 20.19"
+  }
+}
