@@ -292,6 +292,7 @@ Ref fk__delivery_lot_driver__driver: delivery_lot_driver.driver_id > driver.id [
 Table delivery_plan {
   id integer [pk, increment]
   delivery_lot_id integer [not null]
+  optimizer_id varchar(36) [note: 'UUID']
 }
 
 Ref fk__delivery_plan__delivery_lot: delivery_plan.delivery_lot_id > delivery_lot.id [delete: cascade]
