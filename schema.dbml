@@ -57,7 +57,7 @@ Table company {
 
 Ref fk__company__tenant: company.tenant_id > tenant.id [delete: cascade]
 
-Table user {
+Table company_user {
   id integer [pk, increment]
   company_id integer [not null]
   alias varchar(50) [not null]
@@ -66,7 +66,7 @@ Table user {
   }
 }
 
-Ref fk__user__company: user.company_id > company.id [delete: cascade]
+Ref fk__company_user__company: company_user.company_id > company.id [delete: cascade]
 
 // ------------------------------------
 // Vehicle
