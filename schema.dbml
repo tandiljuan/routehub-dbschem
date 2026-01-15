@@ -222,7 +222,7 @@ Table delivery {
   weight integer
   weight_unit weight_unit [null]
   packaging packaging_type [null]
-  handling special_handling [null, note: "List of special handling"]
+  handling JSON [null, note: "List of special handling"]
   value_cents integer
   value_currency varchar(3) [note: 'ISO 4217 code']
   extra JSON
