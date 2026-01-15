@@ -256,6 +256,7 @@ Table delivery_lot {
   route_length_min integer [note: 'Minimum distance for a delivery route']
   route_length_max integer [note: 'Maximum distance for a delivery route']
   route_length_unit length_unit [null]
+  route_time_min integer [note: 'Minimum delivery route time']
   route_time_max integer [note: 'Maximum delivery route time']
   route_time_unit time_unit [null]
 }
