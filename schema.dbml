@@ -46,6 +46,17 @@ Table tenant {
   alias varchar(50) [unique, not null]
 }
 
+Table tenant_user {
+  id integer [pk, increment]
+  tenant_id integer [not null]
+  alias varchar(50) [not null]
+  indexes {
+    (tenant_id, alias) [unique]
+  }
+}
+
+Ref fk__tenant_user__company: tenant_user.tenant_id > tenant.id [delete: cascade]
+
 Table company {
   id integer [pk, increment]
   tenant_id integer [not null]
