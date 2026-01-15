@@ -46,6 +46,17 @@ Table tenant {
   alias varchar(50) [unique, not null]
 }
 
+Table tenant_user {
+  id integer [pk, increment]
+  tenant_id integer [not null]
+  alias varchar(50) [not null]
+  indexes {
+    (tenant_id, alias) [unique]
+  }
+}
+
+Ref fk__tenant_user__company: tenant_user.tenant_id > tenant.id [delete: cascade]
+
 Table company {
   id integer [pk, increment]
   tenant_id integer [not null]
@@ -57,7 +68,7 @@ Table company {
 
 Ref fk__company__tenant: company.tenant_id > tenant.id [delete: cascade]
 
-Table user {
+Table company_user {
   id integer [pk, increment]
   company_id integer [not null]
   alias varchar(50) [not null]
@@ -66,7 +77,7 @@ Table user {
   }
 }
 
-Ref fk__user__company: user.company_id > company.id [delete: cascade]
+Ref fk__company_user__company: company_user.company_id > company.id [delete: cascade]
 
 // ------------------------------------
 // Vehicle
@@ -222,7 +233,7 @@ Table delivery {
   weight integer
   weight_unit weight_unit [null]
   packaging packaging_type [null]
-  handling special_handling [null, note: "List of special handling"]
+  handling JSON [null, note: "List of special handling"]
   value_cents integer
   value_currency varchar(3) [note: 'ISO 4217 code']
   extra JSON
@@ -256,6 +267,7 @@ Table delivery_lot {
   route_length_min integer [note: 'Minimum distance for a delivery route']
   route_length_max integer [note: 'Maximum distance for a delivery route']
   route_length_unit length_unit [null]
+  route_time_min integer [note: 'Minimum delivery route time']
   route_time_max integer [note: 'Maximum delivery route time']
   route_time_unit time_unit [null]
 }
@@ -292,6 +304,7 @@ Ref fk__delivery_lot_driver__driver: delivery_lot_driver.driver_id > driver.id [
 Table delivery_plan {
   id integer [pk, increment]
   delivery_lot_id integer [not null]
+  optimizer_id varchar(36) [note: 'UUID']
 }
 
 Ref fk__delivery_plan__delivery_lot: delivery_plan.delivery_lot_id > delivery_lot.id [delete: cascade]
