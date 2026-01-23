@@ -248,6 +248,7 @@ Ref fk__delivery__milestone: delivery.milestone_id > milestone.id [delete: set n
 Enum delivery_lot_state {
   UNPROCESSED
   PROCESSING
+  OPTIMIZING
   PROCESSED
   CANCELED
 }
