@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-01-16T19:31:41.620Z
+-- Generated at: 2026-02-02T21:31:30.821Z
 
 CREATE TYPE "length_unit" AS ENUM (
   'CENTIMETER',
@@ -90,6 +90,7 @@ CREATE TYPE "special_handling" AS ENUM (
 CREATE TYPE "delivery_lot_state" AS ENUM (
   'UNPROCESSED',
   'PROCESSING',
+  'OPTIMIZING',
   'PROCESSED',
   'CANCELED'
 );
