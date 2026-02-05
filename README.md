@@ -151,3 +151,39 @@ atlas migrate apply \
   --url "postgres://user:pass@server:port/database?sslmode=disable" \
   --dry-run
 ```
+
+### Docker
+
+In this section, we'll learn how to build the community edition from its source code using Docker and obtain a Docker image containing the application. Run the following command to do so. Note the use of the `DOCKER_BUILDKIT=1` environment variable, which allows the use of [heredocs](https://www.docker.com/blog/introduction-to-heredocs-in-dockerfiles/).
+
+```bash
+DOCKER_BUILDKIT=1 docker build --file Containerfile.atlas --tag 'routehub/atlas' .
+```
+
+Once the build process is complete, you can run the following command to remove any intermediate images.
+
+```bash
+docker image prune --force --filter label=stage=atlas-setup
+```
+
+You can verify that it's working by running a container from the previously built image with the following command.
+
+```bash
+docker run -it --rm \
+  --name "atlas-cli" \
+  "routehub/atlas" \
+  version
+```
+
+To run migrations within a running multi-container application (created with Docker Compose), use the command below. The `MYAPP_DEFAULT` placeholder must be replaced with the network created for your application stack, and the `--url` Atlas parameter needs to be updated with the appropriate database URL.
+
+```bash
+docker run -it --rm \
+  --name "atlas-cli" \
+  --network "MYAPP_DEFAULT" \
+  --volume "$(pwd)/migrations:/atlas/migrations" \
+  "routehub/atlas" \
+  migrate apply \
+  --url "postgres://user:pass@server:port/database?sslmode=disable" \
+  --dry-run
+```
