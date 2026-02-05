@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS delivery_lot (
   company_id INTEGER NOT NULL,
   milestone_id INTEGER,
   fleet_id INTEGER,
-  state TEXT CHECK( state IN ( 'UNPROCESSED', 'PROCESSING', 'PROCESSED', 'CANCELED' ) ) NOT NULL,
+  state TEXT CHECK( state IN ( 'UNPROCESSED', 'PROCESSING', 'OPTIMIZING', 'PROCESSED', 'CANCELED' ) ) NOT NULL,
   vehicle_volume_min INTEGER,
   vehicle_volume_max INTEGER,
   vehicle_capacity_min INTEGER,
