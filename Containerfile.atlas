@@ -1,0 +1,60 @@
+# syntax=docker/dockerfile:1.4
+
+# --------------------------------------
+
+FROM golang:1.25-alpine AS setup
+LABEL stage=atlas-setup
+
+RUN echo ">>> Starting Alpine packages installation..." \
+    && apk update \
+    && apk add --no-cache \
+       git \
+    && echo ">>> Alpine packages installation completed."
+
+RUN echo ">>> Starting clone of Atlas repository..." \
+    && cd /opt \
+    && git clone --branch v1.0.0 --single-branch https://github.com/ariga/atlas \
+    && echo ">>> Clone of Atlas repository completed."
+
+RUN echo ">>> Starting dependencies download..." \
+    && cd /opt/atlas/cmd/atlas/ \
+    && go mod download -x \
+    && echo ">>> Dependencies download completed."
+
+RUN echo ">>> Starting compilation of the Atlas command-line app..." \
+    && cd /opt/atlas/cmd/atlas/ \
+    && go build -v -x \
+    && echo ">>> Compilation of the Atlas command-line app completed."
+
+# --------------------------------------
+
+FROM alpine AS runtime
+LABEL stage=atlas-runtime
+
+WORKDIR /atlas
+
+COPY --from=setup /opt/atlas/cmd/atlas/atlas /usr/bin/
+
+COPY <<EOF /usr/local/bin/entrypoint.sh 
+#!/bin/sh
+set -e
+
+DEFAULT_CMD="/usr/bin/atlas"
+DEFAULT_ARG=""
+
+command -v "\$1" > /dev/null 2>&1 || EXIT_CODE="\$?"
+
+if [ "\$#" -eq 0 ]; then
+  set -- "\$DEFAULT_CMD" "\${DEFAULT_ARG}"
+elif [ \$EXIT_CODE ]; then
+  set -- "\$DEFAULT_CMD" "\$@"
+fi
+
+exec "\$@"
+EOF
+
+RUN chmod a+x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+CMD ["--help"]
