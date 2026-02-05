@@ -38,7 +38,7 @@ npm run 2pg
 
 ### SQLite
 
-The official CLI application doesn't support exporting the DBML schema to SQLite ([for now](https://github.com/holistics/dbml/issues/286)). To address this limitation, you can use the `dbml_sqlite` [Python](https://www.python.org) script. To run it, Python 3.7 or higher is required.
+The official CLI application doesn't support exporting the DBML schema to SQLite ([for now](https://github.com/holistics/dbml/issues/286)). To address this limitation, you can use the [`dbml_sqlite`](https://github.com/dvanderweele/DBML_SQLite) script. To run it, [Python](https://www.python.org) 3.7 or higher is required.
 
 #### Virtual Environment
 
